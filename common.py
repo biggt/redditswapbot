@@ -10,25 +10,6 @@ import praw
 import puni
 
 
-class DictConfigParser(SafeConfigParser):
-    """ SafeConfigParser with a getitem returning a dict for that section """
-
-    def __getitem__(self, key):
-        """ Get section as a dictionary """
-        if key not in self.sections():
-            raise KeyError("No section named %s" % key)
-        else:
-            config_dict = {}
-            for option, _ in self.items(key):
-                try:
-                    value = self.getboolean(key, option)
-                except ValueError:
-                    value = self.get(key, option)
-                config_dict[option] = value
-
-            return config_dict
-
-
 class SubRedditMod(object):
     """ Helper class to mod a subreddit """
 
@@ -72,7 +53,7 @@ class SubRedditMod(object):
         """ Load config from config.cfg """
         containing_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
         path_to_cfg = os.path.join(containing_dir, 'config.cfg')
-        config = DictConfigParser()
+        config = SafeConfigParser()
         config.read(path_to_cfg)
         return config
 
