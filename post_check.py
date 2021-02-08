@@ -46,7 +46,7 @@ class PostChecker(object):
     def _is_personal_post(self, title):
         return bool(re.search(self._config["trade_post_format"], title))
 
-    def _is_nonpersonal_post(self, title):
+    def _is_informational_post(self, title):
         return bool(re.search(self._config["informational_post_format"], title))
 
     def save_submission(self, post):
@@ -80,23 +80,23 @@ class PostChecker(object):
 
         timestamp_check = False
         post_category = self._config["default_category"]
-        personal_categories = self._post_categories["personal"]
-        for category, category_prop in personal_categories.items():
-            assert not ("have" in category_prop and "want" in category_prop), "Limitation of script"
-            if "want" in category_prop:
-                regex = category_prop["want"].replace("\\\\", "\\")
+        flairs = self._post_categories["flairs"]
+        for flair, flair_prop in flairs.items():
+            assert not ("have" in flair_prop and "want" in flair_prop), "Limitation of script"
+            if "want" in flair_prop:
+                regex = flair_prop["want"].replace("\\\\", "\\")
                 if re.search(regex, want, re.IGNORECASE):
-                    post_category = category
-                    timestamp_check = category_prop["timestamp_check"]
-            if "have" in category_prop:
-                regex = category_prop["have"].replace("\\\\", "\\")
+                    post_flair = flair
+                    timestamp_check = flair_prop["timestamp_check"]
+            if "have" in flair_prop:
+                regex = flair_prop["have"].replace("\\\\", "\\")
                 if re.search(regex, have, re.IGNORECASE):
-                    post_category = category
-                    timestamp_check = category_prop["timestamp_check"]
+                    post_flair = flair
+                    timestamp_check = flair_prop["timestamp_check"]
 
-        post.mod.flair(text=post_category, css_class=personal_categories[post_category]["class"])
+        post.mod.flair(text=post_flair, css_class=flairs[post_flair]["class"])
 
-        self.check_repost(post, "personal")
+        self.check_repost(post, flairs[post_flair].get("group", "personal"))
 
         if timestamp_check:
             lines = list(line for line in post.selftext.splitlines() if line)
@@ -113,13 +113,13 @@ class PostChecker(object):
 
         return True
 
-    def check_and_flair_nonpersonal(self, post, clean_title):
-        """ Check title of personal post and flair accordingly """
+    def check_and_flair_informational(self, post, clean_title):
+        """ Check title of informational post and flair accordingly """
 
         tag = re.search(self._config["informational_post_format"], clean_title).group(1)
 
-        for category, category_prop in self._post_categories["nonpersonal"].items():
-            if tag == category_prop["tag"]:
+        for category, category_prop in self._post_categories["flairs"].items():
+            if tag == category_prop.get("tag", None):
                 post_category = category
                 post_category_prop = category_prop
                 break
@@ -134,8 +134,7 @@ class PostChecker(object):
                 # TODO: Remove from automod and add reply here
                 pass
 
-        if post_category_prop.get("repost_check", True):
-            self.check_repost(post, "nonpersonal")
+        self.check_repost(post, post_category_prop.get("group", "nonpersonal"))
 
         if post_category_prop.get("reply", True):
             self.post_comment(post)
@@ -158,9 +157,9 @@ class PostChecker(object):
             if not self.check_and_flair_personal(post, clean_title):
                 return
 
-        elif self._is_nonpersonal_post(clean_title):
+        elif self._is_informational_post(clean_title):
             # TODO: Add strict format check (not necessary at the moment)
-            if not self.check_and_flair_nonpersonal(post, clean_title):
+            if not self.check_and_flair_informational(post, clean_title):
                 return
 
         else:
@@ -221,14 +220,18 @@ class PostChecker(object):
         comment += "{0}\n".format(disclaimer)
         post.reply(comment).mod.distinguish()
 
-    def check_repost(self, post, category_prefix="personal"):
+    def check_repost(self, post, group):
         """
         Check post for repost rule violations
         """
 
+        cooldown = self._post_categories["groups"][group].get("cooldown", None)
+        if cooldown is None:
+            return
+
         db_row = self._get_user_db_entry(post)
-        last_created_col = "{}_last_created".format(category_prefix)
-        last_id_col = "{}_last_id".format(category_prefix)
+        last_created_col = "{}_last_created".format(group)
+        last_id_col = "{}_last_id".format(group)
         if db_row is not None:
             last_id = db_row[last_id_col]
             last_created = db_row[last_created_col]
@@ -240,7 +243,7 @@ class PostChecker(object):
                         self._subreddit.is_removed(last_id)):
                     LOGGER.info("Submission https://redd.it/{} not reported because grace period. "
                                 "(Previous submission: https://redd.it/{})".format(post.id, last_id))
-                elif seconds_between_posts < int(self._config["upper_hour"]) * 3600:
+                elif seconds_between_posts < cooldown * 3600:
                     LOGGER.info("Submission https://redd.it/{} removed and flagged for repost violation. "
                                 "(Previous submission: https://redd.it/{})".format(post.id, last_id))
                     post.mod.remove()

@@ -1,59 +1,76 @@
 {
-    "personal": {
-	"Selling": {
-	    "want": "(cash|paypal|\\$|google w|money)",
-	    "class": "selling",
-	    "timestamp_check": true
-	},
-	"Buying": {
-	    "have": "(cash|paypal|\\$|google w|money)",
-	    "class": "buying",
-	    "timestamp_check": false
-	},
-	"Trading": {
-	    "want": "(trade)",
-	    "class": "trading",
-	    "timestamp_check": true
-	}
-    },
-    "nonpersonal": {
-	"META": {
-	    "tag": "META",
-	    "class": "meta",
-	    "required_flair": "i-mod",
-	    "reply": false,
-	    "repost_check": false
-	},
-	"Interest Check": {
-	    "tag": "IC",
-	    "class": "interestcheck"
-	},
-	"Fundraiser": {
-	    "tag": "Fundraiser",
-	    "class": "fundraiser",
-	    "repost_check": false
-	},
-	"Group Buy": {
-	    "tag": "GB",
-	    "class": "groupbuy"
-	},
-	"Artisan": {
-	    "tag": "Artisan",
-	    "class": "artisan"
-	},
-	"Vendor": {
-	    "tag": "Vendor",
-	    "class": "vendor",
-	    "required_flair": "i-vendor"
-	},
-	"Service": {
-	    "tag": "Service",
-	    "class": "service"
-	},
-	"Giveaway": {
-	    "tag": "Giveaway",
-	    "class": "giveaway",
-	    "repost_check": false
-	}
-    }
+   "groups":{
+      "personal":{
+         "cooldown":47
+      },
+      "nonpersonal":{
+         "cooldown":47
+      },
+      "other":{
+         "cooldown":null
+      }
+   },
+   "flairs":{
+      "Selling":{
+         "group":"personal",
+         "want":"(cash|paypal|\\$|google w|money)",
+         "class":"selling",
+         "timestamp_check":true
+      },
+      "Buying":{
+         "group":"personal",
+         "have":"(cash|paypal|\\$|google w|money)",
+         "class":"buying",
+         "timestamp_check":false
+      },
+      "Trading":{
+         "group":"personal",
+         "want":"(trade)",
+         "class":"trading",
+         "timestamp_check":true
+      },
+      "Interest Check":{
+         "group":"nonpersonal",
+         "tag":"IC",
+         "class":"interestcheck"
+      },
+      "Group Buy":{
+         "group":"nonpersonal",
+         "tag":"GB",
+         "class":"groupbuy"
+      },
+      "Artisan":{
+         "group":"nonpersonal",
+         "tag":"Artisan",
+         "class":"artisan"
+      },
+      "Vendor":{
+         "group":"nonpersonal",
+         "tag":"Vendor",
+         "class":"vendor",
+         "required_flair":"i-vendor"
+      },
+      "Service":{
+         "group":"nonpersonal",
+         "tag":"Service",
+         "class":"service"
+      },
+      "META":{
+         "group":"other",
+         "tag":"META",
+         "class":"meta",
+         "required_flair":"i-mod",
+         "reply":false
+      },
+      "Fundraiser":{
+         "group":"other",
+         "tag":"Fundraiser",
+         "class":"fundraiser"
+      },
+      "Giveaway":{
+         "group":"other",
+         "tag":"Giveaway",
+         "class":"giveaway"
+      }
+   }
 }
