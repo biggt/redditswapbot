@@ -79,7 +79,7 @@ class PostChecker(object):
             self.save_submission(post)
 
         timestamp_check = False
-        post_category = self._config["default_category"]
+        post_flair = self._config["default_category"]
         flairs = self._post_categories["flairs"]
         for flair, flair_prop in flairs.items():
             assert not ("have" in flair_prop and "want" in flair_prop), "Limitation of script"
@@ -120,23 +120,23 @@ class PostChecker(object):
 
         for category, category_prop in self._post_categories["flairs"].items():
             if tag == category_prop.get("tag", None):
-                post_category = category
-                post_category_prop = category_prop
+                post_flair = category
+                post_flair_prop = category_prop
                 break
         else:
             self.remove_post(post, "tag")
             return False
 
-        post.mod.flair(text=post_category, css_class=post_category_prop["class"])
+        post.mod.flair(text=post_flair, css_class=post_flair_prop["class"])
 
-        if "required_flair" in post_category_prop:
-            if post_category_prop["required_flair"] != post.author_flair_css_class:
+        if "required_flair" in post_flair_prop:
+            if post_flair_prop["required_flair"] != post.author_flair_css_class:
                 # TODO: Remove from automod and add reply here
                 pass
 
-        self.check_repost(post, post_category_prop.get("group", "nonpersonal"))
+        self.check_repost(post, post_flair_prop.get("group", "nonpersonal"))
 
-        if post_category_prop.get("reply", True):
+        if post_flair_prop.get("reply", True):
             self.post_comment(post)
 
         return True
