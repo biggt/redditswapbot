@@ -6,6 +6,9 @@
       "nonpersonal":{
          "cooldown":47
       },
+      "commercial":{
+         "cooldown":167
+      },
       "other":{
          "cooldown":null
       }
@@ -45,15 +48,20 @@
          "class":"artisan"
       },
       "Vendor":{
-         "group":"nonpersonal",
+         "group":"commercial",
          "tag":"Vendor",
          "class":"vendor",
          "required_flair":"i-vendor"
       },
       "Service":{
-         "group":"nonpersonal",
+         "group":"commercial",
          "tag":"Service",
          "class":"service"
+      },
+      "Bulk":{
+         "group":"commercial",
+         "tag":"Bulk",
+         "class":"bulk"
       },
       "META":{
          "group":"other",
