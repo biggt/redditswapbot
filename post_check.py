@@ -7,6 +7,7 @@ import sqlite3
 import unicodedata
 import json
 import os
+import math
 from datetime import datetime
 from time import sleep
 
@@ -247,11 +248,20 @@ class PostChecker(object):
                     LOGGER.info("Submission https://redd.it/{} removed and flagged for repost violation. "
                                 "(Previous submission: https://redd.it/{})".format(post.id, last_id))
                     post.mod.remove()
-                    reply = post.reply("Your submission has automatically been flagged for review. "
-                                       "Please do not delete your submission and/or make a new submission.\n\n"
-                                       "A mod will review your submission as soon as possible "
-                                       "and approve the post if everything looks OK.")
-                    reply.report("Probable repost, link to previous post: https://redd.it/{}".format(last_id))
+                    # Add an extra hour for good measure
+                    remaining_hours = math.ceil(cooldown - seconds_between_posts / 3600) + 1
+                    reply = post.reply(("Your submission has automatically been removed violating the " +
+                                        "cooldown period for {group} submissions. " +
+                                        "You will need to wait at least {hours} until making another submission.\n\n" +
+                                        "Note that repeated violations of this rule can result in a temporary " +
+                                        "suspension, so please keep track of your posting times in the future.\n\n" +
+                                        "For more information regarding the general posting rules, such as " +
+                                        "cooldowns, please read the {rules}.\n\n" +
+                                        "If you think this removal was made in error, please send a {modmail}.").format(
+                                            group=group, hours=remaining_hours,
+                                            rules=self._subreddit.get_rules_link("rules"),
+                                            modmail=self._subreddit.get_modmail_link()))
+                    reply.report("Repost, link to previous post: https://redd.it/{}".format(last_id))
                     return
             self._update_user_db(post, (last_created_col, last_id_col))
         else:
