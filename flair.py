@@ -111,9 +111,14 @@ class TradeFlairer(object):
 
     def _get_warning(self, comment, warning_type):
         # TODO: Move proof to config
-        proofs = ["Screenshot of PM's between the users"]
-        modmail_content = ("Comment link: {link}\n\nLink to screenshots of PM's: [REQUIRED]"
-                           .format(link=comment.permalink))
+        proofs = ["Screenshot of PM's between the users", "Tracking number or timestamp of received item(s)"]
+        modmail_content = """
+Comment link: {link}
+
+Link to screenshots of PM's: [REQUIRED]
+
+Tracking number / timestamp of received item(s):
+""".format(link=comment.permalink)
         modmail_link = self._subreddit.get_modmail_link(subject="Trade Confirmation Proof",
                                                         content=modmail_content)
         warning = self._config["{type}_warning".format(type=warning_type)] + "\n\n"
