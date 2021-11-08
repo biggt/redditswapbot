@@ -252,9 +252,10 @@ class PostChecker(object):
                     remaining_hours = math.ceil(cooldown - seconds_between_posts / 3600) + 1
                     reply = post.reply(("Your submission has automatically been removed violating the " +
                                         "cooldown period for {group} submissions. " +
-                                        "You will need to wait at least {hours} until making another submission.\n\n" +
+                                        "You will need to wait at least another {hours} hours " +
+                                        "before submitting a new submission.\n\n" +
                                         "Note that repeated violations of this rule can result in a temporary " +
-                                        "suspension, so please keep track of your posting times in the future.\n\n" +
+                                        "suspension, so please keep track of your submission times in the future.\n\n" +
                                         "For more information regarding the general posting rules, such as " +
                                         "cooldowns, please read the {rules}.\n\n" +
                                         "If you think this removal was made in error, please send a {modmail}.").format(
