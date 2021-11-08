@@ -4,6 +4,7 @@ import sys
 import re
 import argparse
 from datetime import datetime
+from time import sleep
 
 from log_conf import LoggerManager
 from common import SubRedditMod
@@ -218,7 +219,7 @@ Tracking number / timestamp of received item(s):
 
     def process_mod_messages(self):
 
-        for msg in self._subreddit.get_unread_mod_messages():
+        for idx, msg in enumerate(self._subreddit.get_unread_mod_messages()):
             LOGGER.info("Processing PM from mod: " + msg.author.name)
             pattern = r"^https?:\/\/(?:www\.)?reddit\.com\/r\/.*\/comments\/.{6}\/.*\/(.{7})\/$"
             comment_link = re.search(pattern, msg.body)
@@ -245,12 +246,11 @@ Tracking number / timestamp of received item(s):
                 msg.mark_read()
                 continue
 
-            # TODO: Restore when stop supporting old confirmation threads
-            # if comment_id not in self.pending:
-            #     msg.reply("Could not find comment {id} in pending trade confirmations"
-            #               .format(id=comment_id))
-            #     msg.mark_read()
-            #     continue
+            if comment_id not in self.pending:
+                msg.reply("Could not find comment {id} in pending trade confirmations"
+                          .format(id=comment_id))
+                msg.mark_read()
+                continue
 
             if comment.mod_reports:
                 comment.mod.approve()
@@ -274,6 +274,10 @@ Tracking number / timestamp of received item(s):
                 msg.reply("Could not find confirmation reply on submitted comment")
                 msg.mark_read()
             self.close_submission()
+
+            if (idx % 5) == (5 - 1):
+                # Sleep to avoid rate limiting
+                sleep(60)
 
 
 def main():
