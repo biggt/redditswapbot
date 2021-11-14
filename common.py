@@ -3,14 +3,17 @@
 import sys
 import os
 import urllib
+import re
 
 from configparser import SafeConfigParser
 
 import praw
+from praw.models.reddit import widgets
 import puni
 
 
-class SubRedditMod(object):
+# TODO: Split into one generic helper class and one with mod specific actions
+class SubRedditMod:  # pylint: disable=too-many-public-methods
     """ Helper class to mod a subreddit """
 
     _mods = None
@@ -56,6 +59,13 @@ class SubRedditMod(object):
         config = SafeConfigParser()
         config.read(path_to_cfg)
         return config
+
+    def save_config(self):
+        """ Save config to config.cfg """
+        containing_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
+        path_to_cfg = os.path.join(containing_dir, 'config.cfg')
+        with open(path_to_cfg, "w") as configfile:
+            self.config.write(configfile)
 
     def login(self):
         """ Login in praw """
@@ -163,3 +173,22 @@ class SubRedditMod(object):
 
         self._suspended[user.name] = True
         return True
+
+    def update_sidebar_link(self, post_text, post_id):
+        """ Update sidebar links """
+
+        # Old reddit
+        sidebar = self.subreddit.wiki["config/sidebar"]
+        new_link = fr'[{post_text}](/{post_id})'
+        new_md = re.sub(fr'\[{post_text}\]\(\/[a-z0-9]+\)', new_link, sidebar.content_md, 1)
+        sidebar.edit(content=new_md)
+
+        # New reddit
+        for widget in self.subreddit.widgets.items.values():
+            if (isinstance(widget, widgets.ButtonWidget) and
+                    widget.shortName == "Links"):
+                buttons = widget.buttons
+                for button in buttons:
+                    if button.text == post_text:
+                        button.url = f"https://redd.it/{post_id}"
+                widget.mod.update(buttons=buttons)
