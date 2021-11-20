@@ -19,7 +19,7 @@ from common import SubRedditMod
 LOGGER = LoggerManager().getLogger("post_check")
 
 
-class PostChecker(object):
+class PostChecker:
     """ Post check helper """
 
     def __init__(self, subreddit, db_con, post_categories, locations):
@@ -56,9 +56,9 @@ class PostChecker(object):
         if not os.path.exists(user_path):
             os.makedirs(user_path)
 
-        with open(os.path.join(user_path, post.id), "w") as f:
-            f.write(unicodedata.normalize('NFKD', post.title).encode('ascii', 'ignore').decode() + "\n")
-            f.write(unicodedata.normalize('NFKD', post.selftext).encode('ascii', 'ignore').decode())
+        with open(os.path.join(user_path, post.id), "w", encoding="utf-8") as submission_file:
+            submission_file.write(unicodedata.normalize('NFKD', post.title).encode('ascii', 'ignore').decode() + "\n")
+            submission_file.write(unicodedata.normalize('NFKD', post.selftext).encode('ascii', 'ignore').decode())
 
     def check_and_flair_personal(self, post, clean_title):
         """ Check title of personal post and flair accordingly """
@@ -277,9 +277,9 @@ def main():
     try:
         # Setup SubRedditMod
         subreddit = SubRedditMod(LOGGER)
-        with open("submission_categories.json") as category_file:
+        with open("submission_categories.json", "r", encoding="utf-8") as category_file:
             post_categories = json.load(category_file)
-        with open("locations.json") as locations_file:
+        with open("locations.json", "r", encoding="utf-8") as locations_file:
             locations = json.load(locations_file)
 
         # Setup PostChecker

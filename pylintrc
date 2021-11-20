@@ -7,3 +7,8 @@ docstring-min-length=3
 
 # Maximum number of characters on a single line.
 max-line-length=120
+
+[MESSAGES CONTROL]
+
+# Disable warnings that are too common at this point, to be fixed later
+disable=missing-class-docstring, missing-module-docstring, missing-function-docstring, fixme, broad-except

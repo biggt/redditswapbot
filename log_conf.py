@@ -8,14 +8,14 @@ containing_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
 cfg_file = SafeConfigParser()
 path_to_cfg = os.path.join(containing_dir, 'config.cfg')
 cfg_file.read(path_to_cfg)
-sentry = cfg_file.get('logging', 'sentry')
+SENTRY = cfg_file.get('logging', 'sentry')
 
 
 try:
     import sentry_sdk
 except ImportError:
     # sentry_sdk not installed, skip sentry even though config exists
-    sentry = ""
+    SENTRY = ""
 
 
 class Singleton(type):
@@ -28,15 +28,15 @@ class Singleton(type):
         return cls._instances[cls]
 
 
-class LoggerManager(object, metaclass=Singleton):
+class LoggerManager(metaclass=Singleton):  # pylint: disable=too-few-public-methods
     _loggers = {}
 
-    def __init__(self, *args, **kwargs):
-        if sentry and "disable_sentry" not in kwargs:
-            sentry_sdk.init(sentry)
+    def __init__(self, *_args, **kwargs):
+        if SENTRY and "disable_sentry" not in kwargs:
+            sentry_sdk.init(SENTRY)
 
     @staticmethod
-    def getLogger(name=None, enable_sentry=True):
+    def getLogger(name=None):  # pylint: disable=invalid-name
         LoggerManager._loggers[name] = logging.getLogger(name)
         LoggerManager._loggers[name].setLevel(logging.INFO)
 

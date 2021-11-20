@@ -64,7 +64,7 @@ class SubRedditMod:  # pylint: disable=too-many-public-methods
         """ Save config to config.cfg """
         containing_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
         path_to_cfg = os.path.join(containing_dir, 'config.cfg')
-        with open(path_to_cfg, "w") as configfile:
+        with open(path_to_cfg, "w", encoding="utf-8") as configfile:
             self.config.write(configfile)
 
     def login(self):

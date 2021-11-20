@@ -13,7 +13,7 @@ from common import SubRedditMod
 LOGGER = LoggerManager().getLogger("trade_flair")
 
 
-class TradeFlairer(object):
+class TradeFlairer:
     """ Trade flair helper """
 
     def __init__(self, subreddit, logger):
@@ -34,25 +34,25 @@ class TradeFlairer(object):
 
         self._logger.info("Opening trade confirmation submission {id}".format(id=submission))
 
-        with open(submission + "_completed.log", "a+") as completed_file:
+        with open(submission + "_completed.log", "a+", encoding="utf-8") as completed_file:
             completed_file.seek(0)
             self.completed = completed_file.read().splitlines()
 
-        with open(submission + "_pending.log", "a+") as pending_file:
+        with open(submission + "_pending.log", "a+", encoding="utf-8") as pending_file:
             pending_file.seek(0)
             self.pending = pending_file.read().splitlines()
 
     def close_submission(self):
         assert self._current_submission
         if self.pending:
-            with open(self._current_submission + "_pending.log", "w") as pending_file:
+            with open(self._current_submission + "_pending.log", "w", encoding="utf-8") as pending_file:
                 pending_file.write("\n".join(self.pending))
         self._current_submission = None
 
     def add_completed(self, comment):
         assert self._current_submission
         self.completed.append(comment.id)
-        with open(self._current_submission + "_completed.log", "a") as completed_file:
+        with open(self._current_submission + "_completed.log", "a", encoding="utf-8") as completed_file:
             completed_file.write("{id}\n".format(id=comment.id))
 
     def add_pending(self, comment):
@@ -195,7 +195,8 @@ Tracking number / timestamp of received item(s):
             tagged_user = self.check_top_level_comment(comment)
             if tagged_user is None:
                 continue
-            elif tagged_user.lower() == comment.author.name.lower():
+
+            if tagged_user.lower() == comment.author.name.lower():
                 comment.report("Flair: Self-tagging")
 
             for reply in comment.replies:
@@ -212,8 +213,8 @@ Tracking number / timestamp of received item(s):
                     else:
                         self.add_pending(comment)
                     break
-                else:
-                    reply.report("User not tagged in parent")
+
+                reply.report("User not tagged in parent")
 
         self.close_submission()
 
@@ -264,8 +265,7 @@ Tracking number / timestamp of received item(s):
                         reply.mod.approve()
                     self.flair(comment, reply)
                     self.add_completed(comment)
-                    if comment.id in self.pending:
-                        self.remove_pending(comment)
+                    self.remove_pending(comment)
                     msg.reply("Trade flair added for {comment} and {reply}"
                               .format(comment=comment.author.name, reply=reply.author.name))
                     msg.mark_read()
