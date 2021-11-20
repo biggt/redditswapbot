@@ -15,6 +15,9 @@ wiki = /wiki/index/
 sentry =
 
 [trade]
+# Link text on the sidebar (link will be automatically updated on new scheduled submission)
+# For new reddit the link must be in a button widget named "Links"
+sidebar_link = Price check thread
 link_id = TRADE_POST_LINK_ID
 prevlink_id = PREVIOUS_MONTH_TRADE_POST_LINK_ID
 reply = Added
@@ -46,6 +49,9 @@ lower_min = 15
 user_history_dir =
 
 [price]
+# Link text on the sidebar (link will be automatically updated on new scheduled submission)
+# For new reddit the link must be in a button widget named "Links"
+sidebar_link = Price check thread
 link_id = PRICE_CHECK_POST_LINK_ID
 
 [heatware]
