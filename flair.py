@@ -109,24 +109,24 @@ class TradeFlairer:
 
         return True
 
-    def _get_warning(self, comment, warning_type):
+    def _get_review_comment(self, comment, warning_type):
         # TODO: Move proof to config
-        proofs = ["Screenshot of PM's between the users", "Tracking number or timestamp of received item(s)"]
-        modmail_content = """
-Comment link: {link}
+        proofs = ["Link to screenshots of PM's between users",
+                  "Link to online tracking (showing delivery) OR timestamp of received item(s)"]
+        modmail_fields = [f"Comment link: {comment.permalink}"]
+        modmail_fields += [f"{proof}: [REQUIRED]" for proof in proofs]
+        modmail_fields += ["Please note that if any of the fields above is not filled, "
+                           "your Trade Confirmation will most likely not be processed/added. "
+                           "This is due to our limited moderation resources."]
 
-Link to screenshots of PM's: [REQUIRED]
-
-Tracking number / timestamp of received item(s):
-""".format(link=comment.permalink)
-        modmail_link = self._subreddit.get_modmail_link(subject="Trade Confirmation Proof",
-                                                        content=modmail_content)
-        warning = self._config["{type}_warning".format(type=warning_type)] + "\n\n"
-        warning += ("To verify this trade send a {modmail_link} including the following: \n\n"
-                    .format(modmail_link=modmail_link))
-        for proof in proofs:
-            warning += "* {proof}\n".format(proof=proof)
-        return warning
+        modmail_link = self._subreddit.get_modmail_link(title="Trade Confirmation Form",
+                                                        subject="Trade Confirmation Proof",
+                                                        content="\n\n".join(modmail_fields))
+        comment_lines = [f"{self._config[warning_type]}"]
+        comment_lines += [f"To verify this trade please fill out this {modmail_link}. "
+                          "Please note that you need to fill out the full form "
+                          "as provided with no additions or removals."]
+        return "\n\n".join(comment_lines)
 
     def check_requirements(self, parent, reply):
         for comment in [parent, reply]:
@@ -142,10 +142,10 @@ Tracking number / timestamp of received item(s):
 
             if trade_count is not None and trade_count < int(self._config["flair_check"]):
                 if age < int(self._config["age_check"]):
-                    comment.reply(self._get_warning(parent, "age"))
+                    comment.reply(self._get_review_comment(parent, "age_warning"))
                     return False
                 if karma < int(self._config["karma_check"]):
-                    comment.reply(self._get_warning(parent, "karma"))
+                    comment.reply(self._get_review_comment(parent, "karma_warning"))
                     return False
 
         return True
