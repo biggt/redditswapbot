@@ -89,7 +89,7 @@ def main():
     subreddit.save_config()
 
     # Done
-    LOGGER.info("Posted Price Check thread")
+    LOGGER.info(f"Posted {args.post_type} thread")
 
 
 if __name__ == "__main__":

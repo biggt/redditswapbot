@@ -17,7 +17,7 @@ sentry =
 [trade]
 # Link text on the sidebar (link will be automatically updated on new scheduled submission)
 # For new reddit the link must be in a button widget named "Links"
-sidebar_link = Price check thread
+sidebar_link = Confirm your Trades
 link_id = TRADE_POST_LINK_ID
 prevlink_id = PREVIOUS_MONTH_TRADE_POST_LINK_ID
 reply = Added
