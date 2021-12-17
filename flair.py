@@ -4,7 +4,6 @@ import sys
 import re
 import argparse
 from datetime import datetime
-from time import sleep
 
 from log_conf import LoggerManager
 from common import SubRedditMod
@@ -218,15 +217,18 @@ Tracking number / timestamp of received item(s):
 
         self.close_submission()
 
-    def process_mod_messages(self):
+    def process_mod_message(self, message):
 
-        for idx, msg in enumerate(self._subreddit.get_unread_mod_messages()):
-            LOGGER.info("Processing PM from mod: " + msg.author.name)
-            pattern = r"^https?:\/\/(?:www\.)?reddit\.com\/r\/.*\/comments\/.{6}\/.*\/(.{7})\/$"
-            comment_link = re.search(pattern, msg.body)
+        pattern = r"^https?:\/\/(?:www\.)?reddit\.com\/r\/.*\/comments\/.{6}\/.*\/(.{7})\/$"
+
+        reply_lines = []
+        for message_line in message.body.splitlines():
+            if message_line == "":
+                continue
+
+            comment_link = re.search(pattern, message_line)
             if not comment_link:
-                msg.reply("You have submitted an invalid URL")
-                msg.mark_read()
+                message.reply(f"You have submitted an invalid URL: {message_line}")
                 continue
 
             comment_id = comment_link.group(1)
@@ -236,21 +238,17 @@ Tracking number / timestamp of received item(s):
             # tagged_user = self.check_top_level_comment(comment)
             # if tagged_user is None:
             if "u/" not in comment.body.lower():
-                msg.reply("Could not find /u/[user] in comment, sure you submitted the top level comment?")
-                msg.mark_read()
+                message.reply(f"Could not find user mention (/u/[user]) in submitted comment: {message_line}")
                 continue
 
             self.open_submission(comment.submission.id)
 
             if comment_id in self.completed:
-                msg.reply("Trade already completed")
-                msg.mark_read()
+                reply_lines += [f"Trade already completed: {message_line}"]
                 continue
 
             if comment_id not in self.pending:
-                msg.reply("Could not find comment {id} in pending trade confirmations"
-                          .format(id=comment_id))
-                msg.mark_read()
+                message.reply(f"Could not find trade in pending trade confirmations: {message_line}")
                 continue
 
             if comment.mod_reports:
@@ -266,18 +264,30 @@ Tracking number / timestamp of received item(s):
                     self.flair(comment, reply)
                     self.add_completed(comment)
                     self.remove_pending(comment)
-                    msg.reply("Trade flair added for {comment} and {reply}"
-                              .format(comment=comment.author.name, reply=reply.author.name))
-                    msg.mark_read()
+                    reply_lines += [f"Trade flair added for {comment.author.name} and {reply.author.name}: " +
+                                    f"{message_line}"]
                     break
             else:
-                msg.reply("Could not find confirmation reply on submitted comment")
-                msg.mark_read()
+                message.reply(f"Could not find confirmation reply on submitted trade: {message_line}")
             self.close_submission()
+        message.mark_read()
 
-            if (idx % 5) == (5 - 1):
-                # Sleep to avoid rate limiting
-                sleep(60)
+        return reply_lines
+
+    def process_mod_messages(self):
+
+        prev_message_author_name = ""
+        reply_lines = []
+        for message in self._subreddit.get_unread_mod_messages():
+            if reply_lines and message.author.name != prev_message_author_name:
+                message.reply("\n\n".join(reply_lines))
+            LOGGER.info("Processing PM from mod: " + message.author.name)
+            reply_lines += self.process_mod_message(message)
+            prev_message_author_name = message.author.name
+
+        if reply_lines:
+            # reply_lines can only have content if at least one message
+            message.reply("\n\n".join(reply_lines))  # pylint: disable=undefined-loop-variable
 
 
 def main():
