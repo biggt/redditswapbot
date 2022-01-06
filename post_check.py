@@ -188,8 +188,6 @@ class PostChecker:
         Post user info comment
         """
 
-        age = str(datetime.utcfromtimestamp(post.author.created_utc))
-
         try:
             reputation = int(post.author_flair_css_class.lstrip('i-'))
         except AttributeError:
@@ -197,20 +195,24 @@ class PostChecker:
         except ValueError:
             reputation = post.author_flair_css_class.lstrip('i-')
 
-        comment = "* Username: /u/{0}\n".format(str(post.author.name))
-        comment += ("  * [[Click here to send a PM to this user]](https://www.reddit.com/message/compose/?to={0})\n"
-                    .format(str(post.author.name)))
-        comment += "* Join date: {0}\n".format(age)
-        comment += "* Link karma: {0}\n".format(str(post.author.link_karma))
-        comment += "* Comment karma: {0}\n".format(str(post.author.comment_karma))
+        comment_lines = []
+        comment_lines += [f"* Submission time: {datetime.utcfromtimestamp(post.created_utc)} UTC"]
+        comment_lines += ["  * [[Click here to see current UTC time]]" +
+                          "(https://time.is/UTC)"]
+        comment_lines += [f"* Username: /u/{post.author.name}"]
+        comment_lines += ["  * [[Click here to send a PM to this user]]" +
+                          f"(https://www.reddit.com/message/compose/?to={post.author.name})"]
+        comment_lines += [f"* Join date: {datetime.utcfromtimestamp(post.author.created_utc)}"]
+        comment_lines += [f"* Link karma: {post.author.link_karma}"]
+        comment_lines += [f"* Comment karma: {post.author.comment_karma}"]
         if isinstance(reputation, int):
-            comment += "* Reputation: {0} trade(s)\n".format(reputation)
+            comment_lines += [f"* Reputation: {reputation} trade(s)"]
         else:
-            comment += "* Reputation: User is currently a {0}.\n".format(reputation)
+            comment_lines += [f"* Reputation: User is currently a {reputation}."]
         # TODO: Distinguish between normal flair and other flairs
         if post.author_flair_text is not None and "http" in post.author_flair_text:
             name = "Heatware" if "heatware" in post.author_flair_text else "Link"
-            comment += "* {0}: [{1}]({1})\n".format(name, post.author_flair_text)
+            comment_lines += [f"* {name}: [{post.author_flair_text}]({post.author_flair_text})"]
         disclaimer = ("This information does not guarantee a successful swap. "
                       "It is being provided to help potential trade partners have "
                       "more immediate background information about with whom they are swapping. "
@@ -218,8 +220,8 @@ class PostChecker:
                       "{rules} and other guides on the {wiki}").format(
                           rules=self._subreddit.get_rules_link(), wiki=self._subreddit.get_wiki_link())
         disclaimer = "\n^^" + disclaimer.replace(" ", " ^^")
-        comment += "{0}\n".format(disclaimer)
-        post.reply(comment).mod.distinguish()
+        comment_lines += [disclaimer]
+        post.reply("\n".join(comment_lines)).mod.distinguish()
 
     def check_repost(self, post, group):
         """
