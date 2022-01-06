@@ -144,12 +144,15 @@ class SubRedditMod:  # pylint: disable=too-many-public-methods
             self._mods = self.subreddit.moderator()
         return self._mods
 
-    def check_mod_reply(self, item):
+    def check_mod_reply(self, item, exclude_mods=None):
         """ Check if mod already has replied """
         comments = self._get_replies(item)
 
+        mods = set(mod.name for mod in self.get_mods())
+        if exclude_mods:
+            mods -= set(exclude_mods)
         for comment in comments:
-            if comment.author in self.get_mods():
+            if comment.author.name in mods:
                 return True
         return False
 

@@ -296,9 +296,9 @@ def main():
             first_pass = True
             processed = []
             while True:
-                new_posts = subreddit.get_new(20)
+                new_posts = subreddit.get_new(50)
                 for post in new_posts:
-                    if first_pass and subreddit.check_mod_reply(post):
+                    if first_pass and subreddit.check_mod_reply(post, exclude_mods=["AutoModerator"]):
                         processed.append(post.id)
                     if post.id in processed:
                         continue
