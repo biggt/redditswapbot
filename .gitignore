@@ -1,3 +1,19 @@
+# Mechkbot
 config.cfg
 *.log
+*.db
+*.bak
+*.old
+
+# Python
 *.pyc
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
