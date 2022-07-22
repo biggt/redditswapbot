@@ -247,9 +247,9 @@ class TradeFlairer:
                 reply_lines += [f"Trade already completed: {message_line}"]
                 continue
 
-            if comment_id not in self.pending:
-                message.reply(f"Could not find trade in pending trade confirmations: {message_line}")
-                continue
+            # if comment_id not in self.pending:
+            #     message.reply(f"Could not find trade in pending trade confirmations: {message_line}")
+            #     continue
 
             if comment.mod_reports:
                 comment.mod.approve()
@@ -263,7 +263,8 @@ class TradeFlairer:
                         reply.mod.approve()
                     self.flair(comment, reply)
                     self.add_completed(comment)
-                    self.remove_pending(comment)
+                    if comment.id in self.pending:
+                        self.remove_pending(comment)
                     reply_lines += [f"Trade flair added for {comment.author.name} and {reply.author.name}: " +
                                     f"{message_line}"]
                     break
