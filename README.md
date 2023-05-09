@@ -2,7 +2,7 @@
 
 ## Description
 
-Scripts that are used on /r/mechmarket and /r/hardwareswap created by the mods of /r/hardwareswap and modified for use by /u/chankster, /u/NotMelNoGuitars, /u/thelectronicnub, and /u/soilheart. There are three currently running instances of the bot, /u/hwsbot, /u/mechkbot, /u/funkoswapbot.  Finally updated to support Praw v5.
+Scripts that are used on /r/homelabsales, /r/mechmarket, and /r/hardwareswap created by the mods of /r/hardwareswap and modified for use by /u/biggt, /u/chankster, /u/NotMelNoGuitars, /u/thelectronicnub, and /u/soilheart. There are four currently running instances of the bot, /u/hlsbot /u/hwsbot, /u/mechkbot, /u/funkoswapbot.  Finally updated to support Praw v5.
 
 ## Files
 
